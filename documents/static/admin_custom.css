@@ -1,0 +1,60 @@
+/* Stop page from scrolling horizontally */
+html, body {
+    overflow-x: hidden !important;
+}
+
+/* Selector container */
+.selector {
+    display: flex !important;
+    width: 100% !important;
+}
+
+/* Left & right boxes */
+.selector-available,
+.selector-chosen {
+    width: 45% !important;
+}
+
+/* Middle arrows */
+.selector-chooser {
+    width: 10% !important;
+}
+
+/* Permission list box */
+.selector select {
+    width: 100% !important;
+    height: 260px !important;
+
+    overflow-y: auto !important;   /* vertical scroll */
+    overflow-x: auto !important;   /* horizontal scroll */
+
+    white-space: nowrap !important; /* keep text in one line */
+    box-sizing: border-box;
+}
+
+/* Prevent page movement */
+.selector {
+    overflow: hidden !important;
+}
+
+/* Keep titles fixed */
+.selector h2,
+.selector p {
+    position: sticky;
+    top: 0;
+    background: #fff;
+    z-index: 5;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .selector {
+        flex-direction: column !important;
+    }
+
+    .selector-available,
+    .selector-chosen,
+    .selector-chooser {
+        width: 100% !important;
+    }
+}

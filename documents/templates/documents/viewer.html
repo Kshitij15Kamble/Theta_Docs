@@ -1,0 +1,112 @@
+{% extends "documents/base.html" %}
+{% block content %}
+
+<div class="container">
+
+    <h3 class="text-center mb-3">📄Document Viewer</h3>
+
+    <div class="text-center mb-3">
+        <button class="btn btn-primary shadow-sm" onclick="goFullScreen()">
+            ⛶ Fullscreen
+        </button>
+    </div>
+
+    <div class="viewer-wrapper">
+    <div id="doc-container"></div>
+</div>
+
+    <div id="page-loader" class="text-center my-3">
+        <div class="spinner-border text-primary"></div>
+        <p class="text-muted">Loading page...</p>
+    </div>
+
+</div>
+
+<style>
+.doc-viewer img{
+    max-width: 900px;
+    border-radius: 10px;
+    background: white;
+}
+
+.viewer-wrapper {
+    display: flex;
+    justify-content: center;
+}
+
+#doc-container {
+    max-width: 900px;
+    width: 100%;
+}
+
+.doc-page {
+    width: 100%;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+body{
+    background: #f5f7fb;
+}
+</style>
+
+<script>
+const docId = "{{ doc_id }}";
+console.log("DOC ID:", docId);
+let currentPage = 1;
+let loading = false;
+let endReached = false;
+
+document.addEventListener("contextmenu", e => e.preventDefault());
+
+async function loadNextPage() {
+    if (loading || endReached) return;
+
+    loading = true;
+    document.getElementById("page-loader").style.display = "block";
+
+    try {
+        const response = await fetch(
+            `/secure-document/${docId}/page/${currentPage}/`
+        );
+
+        if (!response.ok) {
+            endReached = true;
+            document.getElementById("page-loader").innerHTML =
+                "<p class='text-muted'>End of document</p>";
+            return;
+        }
+
+        const data = await response.json();
+
+        const img = document.createElement("img");
+        img.src = "data:image/png;base64," + data.image;
+        img.className = "doc-page";
+
+        document.getElementById("doc-container").appendChild(img);
+        currentPage++;
+
+    } catch (err) {
+        console.error(err);
+    }
+
+    loading = false;
+    document.getElementById("page-loader").style.display = "none";
+}
+
+window.addEventListener("scroll", () => {
+    if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 300) {
+        loadNextPage();
+    }
+});
+
+document.addEventListener("DOMContentLoaded", loadNextPage);
+
+function goFullScreen() {
+    const elem = document.getElementById("doc-container");
+    if (elem.requestFullscreen) elem.requestFullscreen();
+}
+</script>
+
+{% endblock %}
