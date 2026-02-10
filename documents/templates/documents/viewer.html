@@ -53,7 +53,6 @@ body{
 
 <script>
 const docId = "{{ doc_id }}";
-console.log("DOC ID:", docId);
 let currentPage = 1;
 let loading = false;
 let endReached = false;
@@ -65,7 +64,6 @@ async function loadNextPage() {
 
     loading = true;
     document.getElementById("page-loader").style.display = "block";
-
     try {
         const response = await fetch(
             `/secure-document/${docId}/page/${currentPage}/`
@@ -87,20 +85,16 @@ async function loadNextPage() {
         document.getElementById("doc-container").appendChild(img);
         currentPage++;
 
+        // Trigger next page load automatically
+        setTimeout(loadNextPage, 300);
     } catch (err) {
         console.error(err);
     }
 
     loading = false;
-    document.getElementById("page-loader").style.display = "none";
 }
 
-window.addEventListener("scroll", () => {
-    if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 300) {
-        loadNextPage();
-    }
-});
-
+// Load first page
 document.addEventListener("DOMContentLoaded", loadNextPage);
 
 function goFullScreen() {

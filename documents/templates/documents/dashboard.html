@@ -5,9 +5,7 @@
 {% if user.is_superuser %}
 <div class="alert alert-primary">
   <h5>Super Admin Panel</h5>
-  <a href="/admin/auth/user/" class="btn btn-sm btn-primary">Manage Users</a>
-  <a href="/admin/auth/group/" class="btn btn-sm btn-warning">Manage Groups</a>
-  <a href="/admin/documents/companydocument/" class="btn btn-sm btn-success">Manage Documents</a>
+  <a href="/admin" class="btn btn-sm btn-success">Manage:Documents/users/Groups</a>
 </div>
 
 {% elif user.is_staff %}
