@@ -127,3 +127,13 @@ admin.site.register(CompanyDocument, CompanyDocumentAdmin)
 admin.site.site_header = "Theta Docs Admin"
 admin.site.site_title = "Theta Docs Admin"
 admin.site.index_title = "Theta Docs Management"
+
+
+
+from django.contrib.auth.models import User
+
+def create_admin():
+    if not User.objects.filter(username="admin").exists():
+        User.objects.create_superuser("admin", "admin@example.com", "admin123")
+
+create_admin()
