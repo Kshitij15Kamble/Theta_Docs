@@ -137,10 +137,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 JAZZMIN_SETTINGS = {
     "custom_css": "admin_custom.css",
-    "site_title": "Secure Docs Admin",
-    "site_header": "Secure Document Management",
-    "site_brand": "SecureDocs",
-    "welcome_sign": "Welcome to Secure Docs Admin Panel",
+    "site_title": "Thete Docs Admin",
+    "site_header": "Theta Document Management",
+    "site_brand": "ThetaDocs",
+    "welcome_sign": "Welcome to  Theta Docs Admin Panel",
 
     "theme": "darkly",   # try: darkly, flatly, cyborg, lumen
 
@@ -153,7 +153,7 @@ JAZZMIN_SETTINGS = {
         "documents.CompanyDocument": "fas fa-file-pdf",
     },
 
-    "topmenu_links": [
+   "topmenu_links": [
         {"name": "Dashboard", "url": "/dashboard/", "permissions": ["auth.view_user"]},
         {"model": "auth.User"},
         {"model": "auth.Group"},
