@@ -1,6 +1,5 @@
 import os
 from pdf2image import convert_from_path
-import aspose.words as aw
 import secrets
 import string
 from django.core.mail import send_mail
