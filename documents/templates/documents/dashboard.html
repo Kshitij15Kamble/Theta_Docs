@@ -1,53 +1,82 @@
 {% extends "documents/base.html" %}
 {% block content %}
 
-<h3 class="text-center mb-4">📂 Document Dashboard</h3>
+<div class="container-fluid">
+
+<h3 class="text-center mb-4">Document Dashboard</h3>
+
 {% if user.is_superuser %}
 <div class="alert alert-primary">
   <h5>Super Admin Panel</h5>
-  <a href="/admin" class="btn btn-sm btn-success">Manage:Documents/users/Groups</a>
+  <a href="/admin" class="btn btn-sm btn-success">
+    Manage: Users/Documents/Groups
+  </a>
 </div>
 
 {% elif user.is_staff %}
 <div class="alert alert-info">
   <h5>Admin Panel</h5>
-  <a href="/admin/documents/companydocument/" class="btn btn-sm btn-success">Manage:Documents/users/Groups</a>
- 
+  <a href="/admin/documents/companydocument/" class="btn btn-sm btn-success">
+    Manage: Users/Documents/Groups
+  </a>
+</div>
+{% endif %}
+
+<!-- Search -->
+<div class="mb-3">
+  <input type="text" id="searchInput" class="form-control"
+         placeholder=" Search documents...">
 </div>
 
-{% endif %}
-<!-- Search box -->
-<input type="text" id="searchInput" class="form-control mb-4"
-       placeholder="🔍 Search documents...">
+<div class="table-responsive">
+<table class="table table-bordered table-hover shadow-sm" id="docTable">
+    <thead class="table-light">
+        <tr>
+            <th>Title</th>
+            <th>Author</th>
+            <th>Publication Year</th>
+            <th>Publication Type</th>
+            
+            <th class="text-center">View</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for doc in documents %}
+        <tr>
+            <td>{{ doc.title }}</td>
+            <td>{{ doc.author|default:"-" }}</td>
+            <td>{{ doc.publication_year|default:"-" }}</td>
+            <td>{{ doc.publication_type|default:"-" }}</td>
+            
+            <td class="text-center">
+                <a href="{% url 'secure_document_view' doc.id %}"
+                   class="btn btn-sm btn-primary">
+                    View
+                </a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="6" class="text-center">
+                No documents available.
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
 
-<div class="row" id="docList">
-{% for doc in documents %}
-  <div class="col-lg-4 col-md-6 col-sm-12 mb-3 doc-card">
-    <div class="card shadow h-100">
-      <div class="card-body text-center">
-        <h5 class="card-title">{{ doc.title }}</h5>
-        <p class="text-muted">{{ doc.file_type }}</p>
-        <a href="{% url 'secure_document_view' doc.id %}"
-          class="btn btn-primary">
-            View Document
-        </a>
-      </div>
-    </div>
-  </div>
-{% empty %}
-  <p class="text-center">No documents available.</p>
-{% endfor %}
 </div>
 
 <script>
 document.getElementById("searchInput").addEventListener("keyup", function() {
     let filter = this.value.toLowerCase();
-    let cards = document.getElementsByClassName("doc-card");
+    let rows = document.querySelectorAll("#docTable tbody tr");
 
-    for (let i = 0; i < cards.length; i++) {
-        let title = cards[i].innerText.toLowerCase();
-        cards[i].style.display = title.includes(filter) ? "" : "none";
-    }
+    rows.forEach(function(row) {
+        let text = row.innerText.toLowerCase();
+        row.style.display = text.includes(filter) ? "" : "none";
+    });
 });
 </script>
 

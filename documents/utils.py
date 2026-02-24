@@ -40,28 +40,32 @@ Secure Docs Team
     )
 
 def convert_any_to_images(file_path, doc_id=None):
-    images = []
-
     if not doc_id:
-        return images
+        return []
 
     output_dir = os.path.join(settings.MEDIA_ROOT, "converted", f"doc_{doc_id}")
     os.makedirs(output_dir, exist_ok=True)
 
-    existing_files = sorted(os.listdir(output_dir))
-    if existing_files:
-        return [os.path.join(output_dir, f) for f in existing_files]
+    # If already converted, reuse images
+    existing = sorted([
+        os.path.join(output_dir, f)
+        for f in os.listdir(output_dir)
+        if f.endswith(".png")
+    ])
 
-    if file_path.lower().endswith(".pdf"):
-        pages = convert_from_path(file_path, dpi=120)
+    if existing:
+        return existing
 
-        for i, page in enumerate(pages):
-            img_path = os.path.join(output_dir, f"page_{i+1}.png")
-            page.save(img_path, "PNG")
-            images.append(img_path)
+    # Convert PDF to images
+    pages = convert_from_path(file_path, dpi=120)
 
-    return images
+    image_paths = []
+    for i, page in enumerate(pages, start=1):
+        img_path = os.path.join(output_dir, f"page_{i}.png")
+        page.save(img_path, "PNG")
+        image_paths.append(img_path)
 
+    return image_paths
 
 def get_or_create_images(doc):
     doc_folder = os.path.join(

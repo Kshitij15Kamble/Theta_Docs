@@ -1,20 +1,33 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import authenticate, login, logout
 from django.db.models import Q
-from django.views.generic import FormView
-from django.urls import reverse_lazy
 from django.http import JsonResponse
-
+from django.urls import reverse_lazy
+from django.views.generic import FormView
 from .models import CompanyDocument
 from .utils import convert_any_to_images
 from .forms import UsernameEmailPasswordResetForm
-
+from django.contrib.admin.models import LogEntry, CHANGE
+from django.contrib.contenttypes.models import ContentType
+from django.utils.encoding import force_str
 import base64
-from io import BytesIO      
-from PIL import Image, ImageDraw          
+from io import BytesIO
+from PIL import Image, ImageDraw
 
 
+@login_required
+def role_redirect(request):
+    user = request.user
+
+    if user.is_superuser:
+        return redirect('/admin/')   # Superadmin → full admin
+
+    if user.is_staff:
+        return redirect('/admin/')   # Staff/Admin → admin panel
+
+    return redirect('/dashboard/')   # Normal user → custom dashboard
+
+# ===================== DASHBOARD =====================
 @login_required
 def dashboard(request):
     user = request.user
@@ -31,90 +44,101 @@ def dashboard(request):
         "documents": documents
     })
 
-@login_required
-def secure_document_page(request, doc_id, page_no):
-    doc = get_object_or_404(CompanyDocument, id=doc_id)
-    user = request.user
 
-    user_allowed = user in doc.accessible_by.all()
-    group_allowed = user.groups.filter(id__in=doc.accessible_groups.all()).exists()
-    admin_allowed = user.is_staff or user.is_superuser
-
-    if not (user_allowed or group_allowed or admin_allowed):
-        return JsonResponse({"error": "Access denied"}, status=403)
-
-    image_paths = convert_any_to_images(doc.file.path, doc.id)
-    print("DEBUG images:", image_paths)
-    total_pages = len(image_paths)
-
-    if page_no < 1 or page_no > total_pages:
-        return JsonResponse({"end": True}, status=404)
-
-    img_path = image_paths[page_no - 1]
-
-    img = Image.open(img_path)
-    draw = ImageDraw.Draw(img) 
-    text = "Theta_Learming"
-    draw.text((20, 20), text, fill=(255, 0, 0))
-    
-    buffer = BytesIO()
-    img.save(buffer, format="PNG")
-    encoded = base64.b64encode(buffer.getvalue()).decode()
-
-    return JsonResponse({
-        "image": encoded,
-        "page": page_no,
-        "total_pages": total_pages
-    })
-
+# ===================== VIEWER PAGE =====================
 @login_required
 def secure_document_view(request, doc_id):
     doc = get_object_or_404(CompanyDocument, id=doc_id)
     user = request.user
 
-    user_allowed = user in doc.accessible_by.all()
-    group_allowed = user.groups.filter(
-        id__in=doc.accessible_groups.all()
-    ).exists()
-    admin_allowed = user.is_staff or user.is_superuser
+    allowed = (
+        user.is_superuser
+        or user.is_staff
+        or user in doc.accessible_by.all()
+        or user.groups.filter(id__in=doc.accessible_groups.all()).exists()
+    )
 
-    if not (user_allowed or group_allowed or admin_allowed):
+    if not allowed:
         return render(request, "documents/access_denied.html")
+
+    # 🔥 LOG OPEN EVENT (REAL TIME)
+    LogEntry.objects.create(
+        user_id=user.id,
+        content_type=ContentType.objects.get_for_model(doc),
+        object_id=doc.id,
+        object_repr=force_str(doc.title),
+        action_flag=CHANGE,
+        change_message="Opened Document"
+    )
+
+    return render(request, "documents/viewer.html", {
+        "doc_id": doc.id
+    })
+
+@login_required
+def log_document_close(request, doc_id):
+    doc = get_object_or_404(CompanyDocument, id=doc_id)
+    user = request.user
+
+    LogEntry.objects.create(
+        user_id=user.id,
+        content_type=ContentType.objects.get_for_model(doc),
+        object_id=doc.id,
+        object_repr=force_str(doc.title),
+        action_flag=CHANGE,
+        change_message="Closed Document"
+    )
+
+    return JsonResponse({"status": "ok"})
+
+
+# ===================== IMAGE API (Watermarked) =====================
+@login_required
+def secure_document_page(request, doc_id, page_no):
+    doc = get_object_or_404(CompanyDocument, id=doc_id)
+    user = request.user
+
+    allowed = (
+        user.is_superuser
+        or user.is_staff
+        or user in doc.accessible_by.all()
+        or user.groups.filter(id__in=doc.accessible_groups.all()).exists()
+    )
+
+    if not allowed:
+        return JsonResponse({"error": "Access denied"}, status=403)
 
     image_paths = convert_any_to_images(doc.file.path, doc.id)
 
-    pages = []
-    for img_path in image_paths:
-        with open(img_path, "rb") as f:
-            encoded = base64.b64encode(f.read()).decode()
-            pages.append(encoded)
+    if page_no < 1 or page_no > len(image_paths):
+        return JsonResponse({"end": True}, status=404)
 
-    return render(request, "documents/viewer.html", {"doc_id": doc.id })
+    img = Image.open(image_paths[page_no - 1]).convert("RGBA")
 
+    # Watermark
+    overlay = Image.new("RGBA", img.size, (255, 255, 255, 0))
+    draw = ImageDraw.Draw(overlay)
 
-def login_view(request):
-    if request.method == "POST":
-        username = request.POST["username"]
-        password = request.POST["password"]
+    watermark_text = f"{user.username} - Confidential"
 
-        user = authenticate(request, username=username, password=password)
+    width, height = img.size
+    draw.text(
+        (width // 4, height // 2),
+        watermark_text,
+        fill=(255, 0, 0, 100)
+    )
 
-        if user is not None:
-            login(request, user)
-            return redirect("dashboard")
-        else:
-            return render(request, "documents/login.html", {
-                "error": "Invalid credentials"
-            })
+    final = Image.alpha_composite(img, overlay)
 
-    return render(request, "documents/login.html")
+    buffer = BytesIO()
+    final.convert("RGB").save(buffer, format="PNG")
+    encoded = base64.b64encode(buffer.getvalue()).decode()
 
+    return JsonResponse({
+        "image": encoded
+    })
 
-def logout_view(request):
-    logout(request)
-    return redirect("login")
-
-
+# ===================== PASSWORD RESET =====================
 class SecurePasswordResetView(FormView):
     template_name = "documents/password_reset.html"
     form_class = UsernameEmailPasswordResetForm

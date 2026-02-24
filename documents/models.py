@@ -2,37 +2,21 @@ from django.db import models
 from django.contrib.auth.models import User, Group
 
 class CompanyDocument(models.Model):
-
-    FILE_TYPES = [
-        ('PDF', 'PDF'),
-        ('DOC', 'DOC'),
-        ('DOCX', 'DOCX'),
-        ('IMAGE', 'IMAGE'),
-        ('NEWS', 'NEWS'),
+    PUBLICATION_TYPES = [
+        ('Magazine', 'Magazine'),
+        ('Book', 'Book'),
+        ('Article', 'Article'),
     ]
 
-    title = models.CharField(max_length=200)
-
+    title = models.CharField(max_length=255)
+    author = models.CharField(max_length=255, blank=True, null=True)
+    publication_year = models.IntegerField(blank=True, null=True)
+    publication_type = models.CharField(max_length=100, blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
     file = models.FileField(upload_to='protected/')
 
-    file_type = models.CharField(
-        max_length=10,
-        choices=FILE_TYPES
-    )
-
-    accessible_by = models.ManyToManyField(
-        User,
-        blank=True,
-        related_name="documents",
-        help_text="Users who can view this document"
-    )
-
-    accessible_groups = models.ManyToManyField(
-        Group,
-        blank=True,
-        related_name="group_documents",
-        help_text="Groups who can view this document"
-    )
+    accessible_by = models.ManyToManyField(User, blank=True)
+    accessible_groups = models.ManyToManyField(Group, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
 

@@ -17,31 +17,37 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
-from documents.views import SecurePasswordResetView
 
 urlpatterns = [
+
+    # 🔐 Custom Login (Default for Everyone)
+    path('', auth_views.LoginView.as_view(
+        template_name='documents/login.html'
+    ), name='login'),
+
+    # Logout
+    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+
+    # Django Admin
     path('admin/', admin.site.urls),
-    
+
+    # Documents App
     path('', include('documents.urls')),
 
+    # Password Reset
     path('password-reset/', auth_views.PasswordResetView.as_view(
-    template_name="documents/password_reset.html"
+        template_name="documents/password_reset.html"
     ), name='password_reset'),
 
     path('password-reset/done/', auth_views.PasswordResetDoneView.as_view(
-    template_name="documents/password_reset_done.html"
+        template_name="documents/password_reset_done.html"
     ), name='password_reset_done'),
 
     path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(
-    template_name="documents/password_reset_confirm.html"
+        template_name="documents/password_reset_confirm.html"
     ), name='password_reset_confirm'),
 
     path('reset/done/', auth_views.PasswordResetCompleteView.as_view(
-    template_name="documents/password_reset_complete.html"
+        template_name="documents/password_reset_complete.html"
     ), name='password_reset_complete'),
-
-
-
-
-
 ]

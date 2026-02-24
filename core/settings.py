@@ -23,14 +23,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-dt0ef^c7)k#nwxsosk9m)5&s#j7indgiqn(2xumuj9p)2liwjt'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 ALLOWED_HOSTS = ['*']
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 
-LOGIN_URL = '/login/'
-LOGIN_REDIRECT_URL = '/dashboard/'
-LOGOUT_REDIRECT_URL = '/login/'
+LOGIN_URL = '/'
+LOGIN_REDIRECT_URL = '/role-redirect/'
+LOGOUT_REDIRECT_URL = '/'
 
 
 # Application definition
@@ -128,7 +128,7 @@ STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 STATICFILES_DIRS = [
-    BASE_DIR / "documents" / "static",
+    BASE_DIR / "static",
 ]
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -136,6 +136,7 @@ STATICFILES_DIRS = [
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 JAZZMIN_SETTINGS = {
+    "changeform_format": "single",
     "custom_css": "admin_custom.css",
     "site_title": "Thete Docs Admin",
     "site_header": "Theta Document Management",
@@ -173,10 +174,3 @@ SITE_URL = "http://127.0.0.1:8000"
 
 
 SECURE_CONVERTED_ROOT = BASE_DIR / "secure_docs" / "converted"
-
-
-
-
-
-
-

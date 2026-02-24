@@ -2,105 +2,76 @@
 {% block content %}
 
 <div class="container">
+    <h3 class="text-center mb-3">Document Viewer</h3>
 
-    <h3 class="text-center mb-3">📄Document Viewer</h3>
-
-    <div class="text-center mb-3">
-        <button class="btn btn-primary shadow-sm" onclick="goFullScreen()">
-            ⛶ Fullscreen
-        </button>
-    </div>
-
-    <div class="viewer-wrapper">
     <div id="doc-container"></div>
-</div>
 
-    <div id="page-loader" class="text-center my-3">
+    <div id="loader" class="text-center my-3">
         <div class="spinner-border text-primary"></div>
-        <p class="text-muted">Loading page...</p>
+        <p>Loading...</p>
     </div>
-
 </div>
 
 <style>
-.doc-viewer img{
+#doc-container img {
+    width: 100%;
     max-width: 900px;
+    display: block;
+    margin: 20px auto;
     border-radius: 10px;
-    background: white;
-}
-
-.viewer-wrapper {
-    display: flex;
-    justify-content: center;
-}
-
-#doc-container {
-    max-width: 900px;
-    width: 100%;
-}
-
-.doc-page {
-    width: 100%;
-    margin-bottom: 20px;
-    border-radius: 8px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
-body{
+body {
     background: #f5f7fb;
 }
 </style>
 
 <script>
-const docId = "{{ doc_id }}";
-let currentPage = 1;
+let page = 1;
 let loading = false;
 let endReached = false;
+const docId = "{{ doc_id }}";
 
 document.addEventListener("contextmenu", e => e.preventDefault());
 
-async function loadNextPage() {
+function loadNextPage() {
     if (loading || endReached) return;
 
     loading = true;
-    document.getElementById("page-loader").style.display = "block";
-    try {
-        const response = await fetch(
-            `/secure-document/${docId}/page/${currentPage}/`
-        );
 
-        if (!response.ok) {
+    fetch(`/secure-document/${docId}/page/${page}/`)
+    .then(res => {
+        if (!res.ok) {
             endReached = true;
-            document.getElementById("page-loader").innerHTML =
-                "<p class='text-muted'>End of document</p>";
+            document.getElementById("loader").innerHTML = "<p>End of Document</p>";
             return;
         }
-
-        const data = await response.json();
+        return res.json();
+    })
+    .then(data => {
+        if (!data) return;
 
         const img = document.createElement("img");
         img.src = "data:image/png;base64," + data.image;
-        img.className = "doc-page";
 
         document.getElementById("doc-container").appendChild(img);
-        currentPage++;
-
-        // Trigger next page load automatically
-        setTimeout(loadNextPage, 300);
-    } catch (err) {
-        console.error(err);
-    }
-
-    loading = false;
+        page++;
+        loading = false;
+    });
 }
 
-// Load first page
+window.addEventListener("scroll", () => {
+    if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 300) {
+        loadNextPage();
+    }
+});
+
 document.addEventListener("DOMContentLoaded", loadNextPage);
 
-function goFullScreen() {
-    const elem = document.getElementById("doc-container");
-    if (elem.requestFullscreen) elem.requestFullscreen();
-}
+window.addEventListener("beforeunload", function () {
+    navigator.sendBeacon("/log-close/{{ doc_id }}/");
+});
 </script>
 
 {% endblock %}
