@@ -1,5 +1,4 @@
 ﻿asgiref==3.11.0
-aspose-words==26.1.0
 Django==5.2
 django-cors-headers==4.9.0
 django-jazzmin==3.0.1
