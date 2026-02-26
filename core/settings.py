@@ -23,10 +23,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-dt0ef^c7)k#nwxsosk9m)5&s#j7indgiqn(2xumuj9p)2liwjt'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 ALLOWED_HOSTS = ["theta-docs-1.onrender.com",'*']
 STATIC_ROOT = BASE_DIR / "staticfiles"
-
 
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'dashboard'
@@ -123,10 +122,13 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+STATICFILES_DIRS = [
+    BASE_DIR / "documents" / "static",
+]
 #STATICFILES_DIRS = [
  #   BASE_DIR / "static",
 #]
@@ -183,7 +185,7 @@ X_FRAME_OPTIONS = "SAMEORIGIN"
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 
-SESSION_COOKIE_SAMESITE = "None"
-CSRF_COOKIE_SAMESITE = "None"
+SESSION_COOKIE_SAMESITE = "Lax"
+CSRF_COOKIE_SAMESITE = "Lax"
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
