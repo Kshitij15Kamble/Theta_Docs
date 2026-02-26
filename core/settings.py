@@ -23,8 +23,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-dt0ef^c7)k#nwxsosk9m)5&s#j7indgiqn(2xumuj9p)2liwjt'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-ALLOWED_HOSTS = ['*']
+DEBUG = False
+ALLOWED_HOSTS = ["theta-docs-1.onrender.com",'*']
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 
@@ -177,3 +177,13 @@ SITE_URL = os.environ.get("SITE_URL", "http://127.0.0.1:8000")
 
 SECURE_CONVERTED_ROOT = BASE_DIR / "secure_docs" / "converted"
 X_FRAME_OPTIONS = "SAMEORIGIN"
+
+
+# ===== Production Session Fix =====
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+
+SESSION_COOKIE_SAMESITE = "None"
+CSRF_COOKIE_SAMESITE = "None"
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
