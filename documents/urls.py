@@ -1,33 +1,33 @@
-from django.contrib import admin
-from django.urls import path, include
+from django.urls import path
 from . import views
 from django.contrib.auth import views as auth_views
-from django.shortcuts import redirect
+from django.contrib.auth.views import LogoutView
+
 urlpatterns = [
 
-    # Dashboard
     path('', views.role_redirect, name='role_redirect'),
     path('role-redirect/', views.role_redirect, name='role_redirect'),
-    path("dashboard/", views.dashboard, name="dashboard"),
-    
-    # Document viewer page
+    path('dashboard/', views.dashboard, name='dashboard'),
+
+    # Viewer page (same interface)
     path(
         "secure-document/<int:doc_id>/",
         views.secure_document_view,
         name="secure_document_view"
     ),
 
+    # Stream PDF (new lightweight endpoint)
+    path(
+        "secure-document/<int:doc_id>/file/",
+        views.stream_document,
+        name="stream_document"
+    ),
+
+    # Log close
     path(
         "log-close/<int:doc_id>/",
         views.log_document_close,
-        name="log_document_close",),
-
-
-    # Lazy image loader API
-    path(
-        "secure-document/<int:doc_id>/page/<int:page_no>/",
-        views.secure_document_page,
-        name="secure_document_page"
+        name="log_document_close",
     ),
 
     # Change password
@@ -46,4 +46,6 @@ urlpatterns = [
         ),
         name="password_change_done",
     ),
+
+    path('logout/', LogoutView.as_view(), name='logout'),
 ]

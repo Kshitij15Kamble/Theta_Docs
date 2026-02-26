@@ -28,9 +28,9 @@ ALLOWED_HOSTS = ['*']
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 
-LOGIN_URL = '/'
-LOGIN_REDIRECT_URL = '/role-redirect/'
-LOGOUT_REDIRECT_URL = '/'
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'dashboard'
+LOGOUT_REDIRECT_URL = 'login'
 
 
 # Application definition
@@ -127,9 +127,9 @@ STATIC_URL = 'static/'
 
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-STATICFILES_DIRS = [
-    BASE_DIR / "static",
-]
+#STATICFILES_DIRS = [
+ #   BASE_DIR / "static",
+#]
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
@@ -140,9 +140,11 @@ JAZZMIN_SETTINGS = {
     "custom_css": "admin_custom.css",
     "site_title": "Thete Docs Admin",
     "site_header": "Theta Document Management",
-    "site_brand": "ThetaDocs",
+    "site_brand": "Theta Docs",
     "welcome_sign": "Welcome to  Theta Docs Admin Panel",
-
+    "site_logo": "images/AdminLTELogo.png",
+    "login_logo": "images/AdminLTELogo.png",
+    "site_logo_classes": "img-circle elevation-3",
     "theme": "darkly",   # try: darkly, flatly, cyborg, lumen
 
     "show_sidebar": True,
@@ -170,7 +172,8 @@ EMAIL_HOST_USER = 'kshitij15kamble@gmail.com'
 EMAIL_HOST_PASSWORD = 'ueru frul uoub xmuu'  # Use App Password if 2FA is enabled
 
 DEFAULT_FROM_EMAIL = 'SecureDocs <kshitij15kamble@gmail.com>'
-SITE_URL = "http://127.0.0.1:8000"
+SITE_URL = os.environ.get("SITE_URL", "http://127.0.0.1:8000")
 
 
 SECURE_CONVERTED_ROOT = BASE_DIR / "secure_docs" / "converted"
+X_FRAME_OPTIONS = "SAMEORIGIN"

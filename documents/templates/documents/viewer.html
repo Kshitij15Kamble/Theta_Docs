@@ -1,76 +1,58 @@
 {% extends "documents/base.html" %}
 {% block content %}
 
-<div class="container">
-    <h3 class="text-center mb-3">Document Viewer</h3>
+<div class="container-fluid px-0">
+    <h4 class="text-center mb-3">Document Viewer</h4>
 
-    <div id="doc-container"></div>
-
-    <div id="loader" class="text-center my-3">
-        <div class="spinner-border text-primary"></div>
-        <p>Loading...</p>
-    </div>
+    <div id="pdf-container" style="width:100%; background:white;"></div>
 </div>
 
-<style>
-#doc-container img {
-    width: 100%;
-    max-width: 900px;
-    display: block;
-    margin: 20px auto;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-}
-
-body {
-    background: #f5f7fb;
-}
-</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
 <script>
-let page = 1;
-let loading = false;
-let endReached = false;
-const docId = "{{ doc_id }}";
-
 document.addEventListener("contextmenu", e => e.preventDefault());
 
-function loadNextPage() {
-    if (loading || endReached) return;
+const url = "/secure-document/{{ doc_id }}/file/";
+const container = document.getElementById("pdf-container");
 
-    loading = true;
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
-    fetch(`/secure-document/${docId}/page/${page}/`)
-    .then(res => {
-        if (!res.ok) {
-            endReached = true;
-            document.getElementById("loader").innerHTML = "<p>End of Document</p>";
-            return;
-        }
-        return res.json();
-    })
-    .then(data => {
-        if (!data) return;
+pdfjsLib.getDocument(url).promise.then(function(pdf) {
 
-        const img = document.createElement("img");
-        img.src = "data:image/png;base64," + data.image;
+    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+       pdf.getPage(pageNum).then(function(page) {
 
-        document.getElementById("doc-container").appendChild(img);
-        page++;
-        loading = false;
+    const viewport = page.getViewport({ scale: 1 });
+
+    const scale = container.clientWidth / viewport.width;
+    const outputScale = window.devicePixelRatio || 1;
+
+    const scaledViewport = page.getViewport({ scale: scale });
+
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+
+    canvas.width = Math.floor(scaledViewport.width * outputScale);
+    canvas.height = Math.floor(scaledViewport.height * outputScale);
+
+    canvas.style.width = scaledViewport.width + "px";
+    canvas.style.height = scaledViewport.height + "px";
+
+    context.setTransform(outputScale, 0, 0, outputScale, 0, 0);
+
+    canvas.style.display = "block";
+    canvas.style.margin = "0 auto 20px auto";
+    canvas.style.maxWidth = "100%";
+
+    container.appendChild(canvas);
+
+    page.render({
+        canvasContext: context,
+        viewport: scaledViewport
     });
-}
-
-window.addEventListener("scroll", () => {
-    if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 300) {
-        loadNextPage();
-    }
 });
-
-document.addEventListener("DOMContentLoaded", loadNextPage);
-
-window.addEventListener("beforeunload", function () {
-    navigator.sendBeacon("/log-close/{{ doc_id }}/");
+    }
 });
 </script>
 
