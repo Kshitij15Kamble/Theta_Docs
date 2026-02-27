@@ -23,7 +23,7 @@ canvas {
 <script>
 document.addEventListener("contextmenu", e => e.preventDefault());
 
-const url = "/secure-document/{{ doc_id }}/file/";
+const url = "{% url 'stream_document' doc_id %}";
 const container = document.getElementById("pdf-container");
 
 pdfjsLib.GlobalWorkerOptions.workerSrc =

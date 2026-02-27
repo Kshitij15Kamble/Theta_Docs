@@ -1,102 +1,117 @@
 /* ============================= */
-/* ===== GLOBAL FIXES ===== */
-/* ============================= */
-
-/* Stop page from horizontal scrolling */
-html, body {
-    overflow-x: hidden !important;
-}
-
-/* ============================= */
-/* ===== SELECTOR FIX ===== */
-/* ============================= */
-
-.selector {
-    display: flex !important;
-    width: 100% !important;
-    overflow: hidden !important;
-}
-
-.selector-available,
-.selector-chosen {
-    width: 45% !important;
-}
-
-.selector-chooser {
-    width: 10% !important;
-}
-
-.selector select {
-    width: 100% !important;
-    height: 260px !important;
-    overflow-y: auto !important;
-    overflow-x: auto !important;
-    white-space: nowrap !important;
-    box-sizing: border-box;
-}
-
-.selector h2,
-.selector p {
-    position: sticky;
-    top: 0;
-    background: #fff;
-    z-index: 5;
-}
-
-/* ============================= */
-/* ===== MOBILE ADMIN FIX ===== */
+/* ===== TRUE MOBILE ADMIN FIX ===== */
 /* ============================= */
 
 @media (max-width: 768px) {
 
-    /* Remove horizontal scroll */
+    /* Kill all horizontal overflow */
+    body,
     .content-wrapper,
     .content,
-    .container-fluid {
+    .container-fluid,
+    .row,
+    .col-12,
+    .col-md-auto,
+    .card,
+    .card-body {
+        overflow-x: hidden !important;
+        max-width: 100% !important;
+    }
+
+    /* Force table wrapper full width */
+    .table-responsive {
         overflow-x: hidden !important;
     }
 
-    /* Table full width */
-    .table {
+    table {
         width: 100% !important;
-        border-collapse: separate;
-        border-spacing: 0 14px;
     }
 
-    /* Hide table header */
-    .table thead {
+    /* Hide header */
+    table thead {
         display: none;
     }
 
-    /* Convert rows to cards */
-    .table tbody tr {
+    /* Convert each row into card */
+    table tbody tr {
         display: block;
-        background: #ffffff;
+        width: 100% !important;
+        background: #fff;
         border-radius: 12px;
+        margin-bottom: 16px;
         padding: 15px;
-        margin-bottom: 15px;
         box-shadow: 0 4px 12px rgba(0,0,0,0.08);
     }
 
-    /* Stack columns */
-    .table tbody td {
+    /* Stack each cell */
+    table tbody td {
         display: block;
         width: 100% !important;
         border: none !important;
         padding: 6px 0;
-        font-size: 15px;
+        font-size: 14px;
         word-break: break-word;
     }
 
     /* Checkbox spacing */
-    .table tbody td:first-child {
+    table tbody td:first-child {
         margin-bottom: 10px;
     }
 
-    /* Action links styling */
-    .table a {
+    /* Buttons */
+    table a.button,
+    table .button {
         display: inline-block;
         margin-top: 8px;
         font-weight: 600;
+    }
+}
+/* ============================= */
+/* FORCE REMOVE ADMIN HORIZONTAL SCROLL */
+/* ============================= */
+
+@media (max-width: 768px) {
+
+    /* Kill Jazzmin scroll container */
+    .table-responsive {
+        overflow-x: hidden !important;
+    }
+
+    /* Remove forced min width */
+    .table {
+        min-width: 100% !important;
+        width: 100% !important;
+    }
+
+    /* Remove nowrap behavior */
+    .table th,
+    .table td {
+        white-space: normal !important;
+        word-break: break-word !important;
+    }
+
+    /* Make rows stack */
+    .table tbody tr {
+        display: block;
+        width: 100%;
+        margin-bottom: 15px;
+    }
+
+    .table thead {
+        display: none;
+    }
+
+    .table tbody td {
+        display: block;
+        width: 100%;
+        border: none !important;
+        padding: 8px 0;
+    }
+
+    /* Fix content area */
+    .content-wrapper,
+    .content,
+    .container-fluid {
+        overflow-x: hidden !important;
     }
 }

@@ -1,63 +1,94 @@
-/* ============================= */
-/* ===== MOBILE ADMIN FIX ===== */
-/* ============================= */
+/* ===================================================== */
+/* ===== GLOBAL ADMIN MOBILE CARD TRANSFORMATION ====== */
+/* ===================================================== */
 
+/* Prevent horizontal scrolling everywhere */
+html, body,
+.content-wrapper,
+.content,
+.container-fluid,
+.row,
+.col-12 {
+    overflow-x: hidden !important;
+    max-width: 100% !important;
+}
+
+/* ================= MOBILE MODE ================= */
 @media (max-width: 768px) {
 
-    /* Remove horizontal scroll */
-    html, body,
-    .content-wrapper,
-    .content,
-    .container-fluid {
-        overflow-x: hidden !important;
-    }
-
     /* Hide original table header */
-    .table thead {
-        display: none;
+    #result_list thead {
+        display: none !important;
     }
 
-    /* Convert each row to card */
-    .table tbody tr {
-        display: block;
-        background: #ffffff;
-        border-radius: 12px;
-        padding: 15px;
-        margin-bottom: 15px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    /* Remove default alternating row colors */
+    #result_list tbody tr.row1,
+    #result_list tbody tr.row2 {
+        background: #ffffff !important;
     }
 
-    /* Make each cell full width */
-    .table tbody td {
-        display: block;
+    /* Convert each row into a card */
+    #result_list tbody tr {
+        display: block !important;
+        background: #ffffff !important;
+        border-radius: 14px !important;
+        padding: 16px !important;
+        margin-bottom: 18px !important;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.08) !important;
+        border: none !important;
+    }
+
+    /* Stack cells vertically */
+    #result_list tbody td {
+        display: block !important;
         width: 100% !important;
         border: none !important;
-        padding: 6px 0;
-        font-size: 15px;
-        word-break: break-word;
+        padding: 6px 0 !important;
+        font-size: 15px !important;
+        word-break: break-word !important;
+        text-align: left !important;
     }
 
-    /* Add spacing between fields */
-    .table tbody td:not(:first-child) {
-        margin-top: 5px;
+    /* Checkbox spacing */
+    #result_list tbody td:first-child {
+        margin-bottom: 12px !important;
     }
 
-    /* Make action buttons full width */
-    .table a.button {
-        display: block;
-        width: 100%;
-        text-align: center;
-        margin-top: 10px;
-    }
-
-    /* Fix checkbox spacing */
-    .table tbody td:first-child {
-        margin-bottom: 10px;
-    }
-
-    /* Remove inline width styles added by admin */
-    .table {
+    /* Make action links real buttons */
+    #result_list a {
+        display: block !important;
         width: 100% !important;
+        text-align: center !important;
+        padding: 10px 12px !important;
+        margin-top: 10px !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+        text-decoration: none !important;
+        background-color: rgb(70, 135, 255) !important;
+        color: #ffffff !important;
+        transition: 0.2s ease-in-out !important;
+    }
+
+    /* Hover effect */
+    #result_list a:hover {
+        opacity: 0.9 !important;
+    }
+
+    /* Edit button green */
+    #result_list a[href*="change"] {
+        background-color: #288cff !important;
+    }
+
+    /* Activity button (for users) darker */
+    #result_list a[href*="logentry"] {
+        background-color: #2499ffe5 !important;
+    }
+
+    /* Remove table width restrictions */
+    #result_list {
+        width: 100% !important;
+        border-collapse: separate !important;
+        border-spacing: 0 14px !important;
     }
 
 }
