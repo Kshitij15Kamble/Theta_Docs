@@ -28,15 +28,14 @@
          placeholder=" Search documents...">
 </div>
 
-<div class="table-responsive">
-<table class="table table-bordered table-hover shadow-sm" id="docTable">
+<div class="table-responsive d-none d-md-block">
+<table class="table table-bordered table-hover shadow-sm">
     <thead class="table-light">
         <tr>
             <th>Title</th>
             <th>Author</th>
             <th>Publication Year</th>
             <th>Publication Type</th>
-            
             <th class="text-center">View</th>
         </tr>
     </thead>
@@ -47,7 +46,6 @@
             <td>{{ doc.author|default:"-" }}</td>
             <td>{{ doc.publication_year|default:"-" }}</td>
             <td>{{ doc.publication_type|default:"-" }}</td>
-            
             <td class="text-center">
                 <a href="{% url 'secure_document_view' doc.id %}"
                    class="btn btn-sm btn-primary">
@@ -57,13 +55,36 @@
         </tr>
         {% empty %}
         <tr>
-            <td colspan="6" class="text-center">
+            <td colspan="5" class="text-center">
                 No documents available.
             </td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
+</div>
+<!-- Mobile View -->
+<div class="d-md-none">
+    {% for doc in documents %}
+    <div class="card mb-3 shadow-sm">
+        <div class="card-body">
+            <p><strong>Title:</strong> {{ doc.title }}</p>
+            <p><strong>Author:</strong> {{ doc.author|default:"-" }}</p>
+            <p><strong>Year:</strong> {{ doc.publication_year|default:"-" }}</p>
+            <p><strong>Type:</strong> {{ doc.publication_type|default:"-" }}</p>
+
+            <div class="text-center">
+                <a href="{% url 'secure_document_view' doc.id %}"
+                   class="btn btn-primary w-100">
+                    View
+                </a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+        <p class="text-center">No documents available.</p>
+    {% endfor %}
+</div>
 </div>
 
 </div>

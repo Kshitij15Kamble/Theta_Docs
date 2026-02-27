@@ -1,43 +1,40 @@
-/* Stop page from scrolling horizontally */
+/* ============================= */
+/* ===== GLOBAL FIXES ===== */
+/* ============================= */
+
+/* Stop page from horizontal scrolling */
 html, body {
     overflow-x: hidden !important;
 }
 
-/* Selector container */
+/* ============================= */
+/* ===== SELECTOR FIX ===== */
+/* ============================= */
+
 .selector {
     display: flex !important;
     width: 100% !important;
+    overflow: hidden !important;
 }
 
-/* Left & right boxes */
 .selector-available,
 .selector-chosen {
     width: 45% !important;
 }
 
-/* Middle arrows */
 .selector-chooser {
     width: 10% !important;
 }
 
-/* Permission list box */
 .selector select {
     width: 100% !important;
     height: 260px !important;
-
-    overflow-y: auto !important;   /* vertical scroll */
-    overflow-x: auto !important;   /* horizontal scroll */
-
-    white-space: nowrap !important; /* keep text in one line */
+    overflow-y: auto !important;
+    overflow-x: auto !important;
+    white-space: nowrap !important;
     box-sizing: border-box;
 }
 
-/* Prevent page movement */
-.selector {
-    overflow: hidden !important;
-}
-
-/* Keep titles fixed */
 .selector h2,
 .selector p {
     position: sticky;
@@ -46,15 +43,60 @@ html, body {
     z-index: 5;
 }
 
-/* Mobile responsive */
+/* ============================= */
+/* ===== MOBILE ADMIN FIX ===== */
+/* ============================= */
+
 @media (max-width: 768px) {
-    .selector {
-        flex-direction: column !important;
+
+    /* Remove horizontal scroll */
+    .content-wrapper,
+    .content,
+    .container-fluid {
+        overflow-x: hidden !important;
     }
 
-    .selector-available,
-    .selector-chosen,
-    .selector-chooser {
+    /* Table full width */
+    .table {
         width: 100% !important;
+        border-collapse: separate;
+        border-spacing: 0 14px;
+    }
+
+    /* Hide table header */
+    .table thead {
+        display: none;
+    }
+
+    /* Convert rows to cards */
+    .table tbody tr {
+        display: block;
+        background: #ffffff;
+        border-radius: 12px;
+        padding: 15px;
+        margin-bottom: 15px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    /* Stack columns */
+    .table tbody td {
+        display: block;
+        width: 100% !important;
+        border: none !important;
+        padding: 6px 0;
+        font-size: 15px;
+        word-break: break-word;
+    }
+
+    /* Checkbox spacing */
+    .table tbody td:first-child {
+        margin-bottom: 10px;
+    }
+
+    /* Action links styling */
+    .table a {
+        display: inline-block;
+        margin-top: 8px;
+        font-weight: 600;
     }
 }

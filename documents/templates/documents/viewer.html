@@ -6,7 +6,18 @@
 
     <div id="pdf-container" style="width:100%; background:white;"></div>
 </div>
+<style>
+#pdf-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
 
+canvas {
+    max-width: 100%;
+    height: auto !important;
+}
+</style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
 <script>
@@ -18,42 +29,54 @@ const container = document.getElementById("pdf-container");
 pdfjsLib.GlobalWorkerOptions.workerSrc =
     "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
-pdfjsLib.getDocument(url).promise.then(function(pdf) {
+function renderPDF() {
 
-    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-       pdf.getPage(pageNum).then(function(page) {
+    container.innerHTML = ""; // Clear before render
 
-    const viewport = page.getViewport({ scale: 1 });
+    pdfjsLib.getDocument(url).promise.then(function(pdf) {
 
-    const scale = container.clientWidth / viewport.width;
-    const outputScale = window.devicePixelRatio || 1;
+        for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
 
-    const scaledViewport = page.getViewport({ scale: scale });
+            pdf.getPage(pageNum).then(function(page) {
 
-    const canvas = document.createElement("canvas");
-    const context = canvas.getContext("2d");
+                const containerWidth = container.clientWidth;
 
-    canvas.width = Math.floor(scaledViewport.width * outputScale);
-    canvas.height = Math.floor(scaledViewport.height * outputScale);
+                const viewport = page.getViewport({ scale: 1 });
 
-    canvas.style.width = scaledViewport.width + "px";
-    canvas.style.height = scaledViewport.height + "px";
+                const scale = containerWidth / viewport.width;
 
-    context.setTransform(outputScale, 0, 0, outputScale, 0, 0);
+                const scaledViewport = page.getViewport({ scale: scale });
 
-    canvas.style.display = "block";
-    canvas.style.margin = "0 auto 20px auto";
-    canvas.style.maxWidth = "100%";
+                const canvas = document.createElement("canvas");
+                const context = canvas.getContext("2d");
 
-    container.appendChild(canvas);
+                const outputScale = window.devicePixelRatio || 1;
 
-    page.render({
-        canvasContext: context,
-        viewport: scaledViewport
+                canvas.width = scaledViewport.width * outputScale;
+                canvas.height = scaledViewport.height * outputScale;
+
+                canvas.style.width = scaledViewport.width + "px";
+                canvas.style.height = scaledViewport.height + "px";
+
+                context.setTransform(outputScale, 0, 0, outputScale, 0, 0);
+
+                canvas.style.display = "block";
+                canvas.style.margin = "0 auto 25px auto";
+                canvas.style.background = "white";
+
+                container.appendChild(canvas);
+
+                page.render({
+                    canvasContext: context,
+                    viewport: scaledViewport
+                });
+            });
+        }
     });
-});
-    }
-});
+}
+
+document.addEventListener("DOMContentLoaded", renderPDF);
+window.addEventListener("resize", renderPDF);
 </script>
 
 {% endblock %}
