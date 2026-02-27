@@ -28,8 +28,8 @@ ALLOWED_HOSTS = ["theta-docs-1.onrender.com",'*']
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'dashboard'
-LOGOUT_REDIRECT_URL = 'login'
+LOGIN_REDIRECT_URL = '/admin/documents/companydocument/'
+LOGOUT_REDIRECT_URL = '/'
 
 
 # Application definition

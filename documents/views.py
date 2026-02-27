@@ -12,35 +12,6 @@ from .models import CompanyDocument
 from .forms import UsernameEmailPasswordResetForm
 
 
-# ================= ROLE REDIRECT =================
-@login_required
-def role_redirect(request):
-    user = request.user
-
-    if user.is_superuser or user.is_staff:
-        return redirect('/admin/')
-
-    return redirect('/dashboard/')
-
-
-# ================= DASHBOARD =================
-@login_required
-def dashboard(request):
-    user = request.user
-
-    if user.is_superuser or user.is_staff:
-        documents = CompanyDocument.objects.all()
-    else:
-        documents = CompanyDocument.objects.filter(
-            Q(accessible_by=user) |
-            Q(accessible_groups__in=user.groups.all())
-        ).distinct()
-
-    return render(request, "documents/dashboard.html", {
-        "documents": documents
-    })
-
-
 # ================= VIEWER PAGE (UNCHANGED INTERFACE) =================
 @login_required
 def secure_document_view(request, doc_id):

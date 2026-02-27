@@ -1,40 +1,23 @@
-"""
-URL configuration for core project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.2/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
 
-    # 🔐 Custom Login (Default for Everyone)
+    # Login page
     path('', auth_views.LoginView.as_view(
         template_name='documents/login.html'
     ), name='login'),
 
-    # Logout
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
 
-    # Django Admin
+    # Admin
     path('admin/', admin.site.urls),
 
-    # Documents App
-    path('', include('documents.urls')),
+    # Documents
+    path('documents/', include('documents.urls')),
 
-    # Password Reset
+    # Password reset
     path('password-reset/', auth_views.PasswordResetView.as_view(
         template_name="documents/password_reset.html"
     ), name='password_reset'),

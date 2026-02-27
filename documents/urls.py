@@ -5,9 +5,7 @@ from django.contrib.auth.views import LogoutView
 
 urlpatterns = [
 
-    path('', views.role_redirect, name='role_redirect'),
-    path('role-redirect/', views.role_redirect, name='role_redirect'),
-    path('dashboard/', views.dashboard, name='dashboard'),
+
 
     # Viewer page (same interface)
     path(
