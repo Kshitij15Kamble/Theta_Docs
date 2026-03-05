@@ -5,8 +5,6 @@ from django.contrib.auth.views import LogoutView
 
 urlpatterns = [
 
-
-
     # Viewer page (same interface)
     path(
         "secure-document/<int:doc_id>/",

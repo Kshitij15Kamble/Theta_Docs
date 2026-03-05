@@ -1,117 +1,244 @@
-/* ============================= */
-/* ===== TRUE MOBILE ADMIN FIX ===== */
-/* ============================= */
+/* ===================================================== */
+/* EXPAND ADMIN FORM WIDTH (DESKTOP) */
+/* ===================================================== */
 
-@media (max-width: 768px) {
-
-    /* Kill all horizontal overflow */
-    body,
-    .content-wrapper,
-    .content,
-    .container-fluid,
-    .row,
-    .col-12,
-    .col-md-auto,
-    .card,
-    .card-body {
-        overflow-x: hidden !important;
-        max-width: 100% !important;
-    }
-
-    /* Force table wrapper full width */
-    .table-responsive {
-        overflow-x: hidden !important;
-    }
-
-    table {
-        width: 100% !important;
-    }
-
-    /* Hide header */
-    table thead {
-        display: none;
-    }
-
-    /* Convert each row into card */
-    table tbody tr {
-        display: block;
-        width: 100% !important;
-        background: #fff;
-        border-radius: 12px;
-        margin-bottom: 16px;
-        padding: 15px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    }
-
-    /* Stack each cell */
-    table tbody td {
-        display: block;
-        width: 100% !important;
-        border: none !important;
-        padding: 6px 0;
-        font-size: 14px;
-        word-break: break-word;
-    }
-
-    /* Checkbox spacing */
-    table tbody td:first-child {
-        margin-bottom: 10px;
-    }
-
-    /* Buttons */
-    table a.button,
-    table .button {
-        display: inline-block;
-        margin-top: 8px;
-        font-weight: 600;
-    }
+.content-wrapper .content > .container-fluid > .row > .col-md-9,
+.content-wrapper .content > .container-fluid > .row > .col-lg-9,
+.content-wrapper .content > .container-fluid > .row > .col-md-8,
+.content-wrapper .content > .container-fluid > .row > .col-lg-8 {
+    flex: 0 0 100% !important;
+    max-width: 100% !important;
 }
-/* ============================= */
-/* FORCE REMOVE ADMIN HORIZONTAL SCROLL */
-/* ============================= */
+
+.content-wrapper .content {
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+}
+
+.card,
+.module {
+    max-width: 100% !important;
+}
+
+
+/* ===================================================== */
+/* GROUP / PERMISSION SELECTOR (DESKTOP) */
+/* ===================================================== */
+
+.selector {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    gap: 15px;
+    width: 100%;
+}
+
+/* permission boxes */
+.selector-available,
+.selector-chosen {
+    flex: 1;
+    min-width: 0;
+}
+
+/* arrow column */
+.selector-chooser {
+    min-width: 70px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+/* permission list scroll */
+.selector select {
+    width: 100%;
+    height: 280px !important;
+
+    overflow-y: auto !important;   /* vertical scroll */
+    overflow-x: auto !important;   /* horizontal scroll */
+
+    white-space: nowrap !important; /* prevent wrapping */
+}
+
+/* filter input */
+.selector input {
+    width: 100%;
+}
+
+
+/* ===================================================== */
+/* MOBILE FIXES */
+/* ===================================================== */
 
 @media (max-width: 768px) {
 
-    /* Kill Jazzmin scroll container */
-    .table-responsive {
-        overflow-x: hidden !important;
-    }
+html,
+body,
+.content-wrapper,
+.content,
+.container-fluid {
+    overflow-x: hidden !important;
+}
 
-    /* Remove forced min width */
-    .table {
-        min-width: 100% !important;
-        width: 100% !important;
-    }
 
-    /* Remove nowrap behavior */
-    .table th,
-    .table td {
-        white-space: normal !important;
-        word-break: break-word !important;
-    }
+/* ================================= */
+/* MOBILE ADMIN TABLE → CARD VIEW */
+/* ================================= */
 
-    /* Make rows stack */
-    .table tbody tr {
-        display: block;
-        width: 100%;
-        margin-bottom: 15px;
-    }
+.table thead {
+    display: none;
+}
 
-    .table thead {
-        display: none;
-    }
+.table tbody tr {
+    display: block;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+}
 
-    .table tbody td {
-        display: block;
-        width: 100%;
-        border: none !important;
-        padding: 8px 0;
-    }
+.table-striped tbody tr:nth-of-type(odd) {
+    background: #ffffff !important;
+}
 
-    /* Fix content area */
-    .content-wrapper,
-    .content,
-    .container-fluid {
-        overflow-x: hidden !important;
-    }
+.table tbody td {
+    display: block;
+    width: 100% !important;
+    border: none !important;
+    padding: 6px 0;
+    font-size: 15px;
+    word-break: break-word;
+}
+
+.table a.button,
+.table a {
+    display: block !important;
+    width: 100%;
+    text-align: center;
+    margin-top: 10px;
+    padding: 8px 12px;
+    border-radius: 15px;
+    font-weight: 600;
+    text-decoration: none !important;
+    background: #0d6efd;
+    color: white !important;
+}
+
+.table tbody td:first-child {
+    margin-bottom: 10px;
+}
+}
+
+
+
+/* ================================= */
+/* MOBILE ADMIN FORM WIDTH FIX */
+/* ================================= */
+
+.row {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+.form-group .row > div {
+    flex: 0 0 100% !important;
+    max-width: 100% !important;
+}
+
+.form-group label {
+    width: 100% !important;
+    margin-bottom: 6px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100% !important;
+}
+
+.card-body {
+    padding: 16px !important;
+}
+
+
+
+/* ================================= */
+/* MOBILE PERMISSION SELECTOR */
+/* ================================= */
+
+@media (max-width:768px){
+
+/* stack blocks vertically */
+.selector{
+    display:block !important;
+    width:100% !important;
+}
+
+/* available + chosen blocks full width */
+.selector-available,
+.selector-chosen{
+    width:100% !important;
+    max-width:100% !important;
+    margin-bottom:20px;
+}
+
+/* center arrow buttons */
+.selector-chooser{
+    width:100% !important;
+    display:flex;
+    justify-content:center;
+    margin:10px 0;
+}
+
+/* permission list scroll */
+.selector select{
+    width:100% !important;
+    height:220px !important;
+
+    overflow-y:auto !important;
+    overflow-x:auto !important;
+
+    white-space:nowrap !important; /* prevents letter breaking */
+}
+
+/* filter box */
+.selector input{
+    width:100%;
+}
+
+}
+
+/* ================================= */
+/* FULL WIDTH ADMIN FORM ON MOBILE */
+/* ================================= */
+
+@media (max-width:768px){
+
+/* remove container padding */
+.content-wrapper .content,
+.container-fluid{
+    padding-left:0 !important;
+    padding-right:0 !important;
+}
+
+/* make form column full width */
+.col-md-9,
+.col-lg-9,
+.col-md-8,
+.col-lg-8{
+    flex:0 0 100% !important;
+    max-width:100% !important;
+    padding-left:0 !important;
+    padding-right:0 !important;
+}
+
+/* stretch card to edges */
+.card,
+.module{
+    margin-left:0 !important;
+    margin-right:0 !important;
+    border-radius:0 !important;
+}
+
 }
