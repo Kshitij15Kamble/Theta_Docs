@@ -1,3 +1,5 @@
+from urllib import request
+from django.contrib.auth.models import Permission
 from django.contrib import admin
 from django.contrib.admin.models import LogEntry
 from django.contrib.auth.models import User, Group, Permission
@@ -129,11 +131,16 @@ class CustomUserAdmin(UserAdmin):
 
     # ---------------- PASSWORD AUTO GENERATE ----------------
     def save_model(self, request, obj, form, change):
+
         is_new_user = obj.pk is None
 
         if is_new_user:
             password = generate_secure_password()
+
             obj.set_password(password)
+
+            # make user staff
+            obj.is_staff = True
 
         super().save_model(request, obj, form, change)
 
@@ -143,6 +150,8 @@ class CustomUserAdmin(UserAdmin):
                 password=password,
                 email=obj.email
             )
+        view_permission = Permission.objects.get(codename="view_companydocument")
+        obj.user_permissions.add(view_permission)
 
     # ---------------- RESTRICT PERMISSIONS ----------------
     def formfield_for_manytomany(self, db_field, request, **kwargs):
