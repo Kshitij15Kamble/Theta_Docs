@@ -143,7 +143,7 @@ JAZZMIN_SETTINGS = {
     "site_title": "Thete Docs Admin",
     "site_header": "Theta Document Management",
     "site_brand": "Theta Docs",
-    "welcome_sign": "Welcome to  Theta Docs Admin Panel",
+    "welcome_sign": "Welcome to  Theta Docs",
     "site_logo": "images/AdminLTELogo.png",
     "login_logo": "images/AdminLTELogo.png",
     "site_logo_classes": "img-circle elevation-3",
@@ -158,11 +158,6 @@ JAZZMIN_SETTINGS = {
         "documents.CompanyDocument": "fas fa-file-pdf",
     },
 
-   "topmenu_links": [
-        {"name": "Dashboard", "url": "/dashboard/", "permissions": ["auth.view_user"]},
-        {"model": "auth.User"},
-        {"model": "auth.Group"},
-    ],
 }
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
