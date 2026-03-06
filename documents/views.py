@@ -97,9 +97,9 @@ def login_view(request):
             login(request, user)
             return redirect("/admin/documents/companydocument/")
         else:
-            return render(request, "login.html", {"error": "Invalid username or password"})
+            return render(request, "documents/login.html", {"error": "Invalid username or password"})
 
-    return render(request, "login.html")
+    return render(request, "documents/login.html")
 
 
 # ================= PASSWORD RESET =================
