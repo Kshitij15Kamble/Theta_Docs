@@ -1,13 +1,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.db.models import Q
+from django.contrib.auth import authenticate, login
 from django.http import FileResponse, HttpResponseForbidden, JsonResponse
 from django.urls import reverse_lazy
 from django.views.generic import FormView
 from django.contrib.admin.models import LogEntry, CHANGE
 from django.contrib.contenttypes.models import ContentType
 from django.utils.encoding import force_str
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 from .models import CompanyDocument
 from .forms import UsernameEmailPasswordResetForm
 
@@ -83,6 +83,23 @@ def log_document_close(request, doc_id):
     )
 
     return JsonResponse({"status": "ok"})
+
+@ensure_csrf_cookie
+def login_view(request):
+
+    if request.method == "POST":
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            login(request, user)
+            return redirect("/admin/documents/companydocument/")
+        else:
+            return render(request, "login.html", {"error": "Invalid username or password"})
+
+    return render(request, "login.html")
 
 
 # ================= PASSWORD RESET =================

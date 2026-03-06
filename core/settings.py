@@ -166,7 +166,7 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
 EMAIL_HOST_USER = 'kshitij15kamble@gmail.com'
-EMAIL_HOST_PASSWORD = 'ueru frul uoub xmuu'  # Use App Password if 2FA is enabled
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_PASSWORD")  # Use App Password if 2FA is enabled
 
 DEFAULT_FROM_EMAIL = 'SecureDocs <kshitij15kamble@gmail.com>'
 SITE_URL = os.environ.get("SITE_URL", "http://127.0.0.1:8000")
