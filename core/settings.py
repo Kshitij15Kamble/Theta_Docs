@@ -130,9 +130,12 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [
     BASE_DIR / "documents" / "static",
 ]
-#STATICFILES_DIRS = [
- #   BASE_DIR / "static",
-#]
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
+
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
@@ -167,7 +170,7 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
 EMAIL_HOST_USER = 'kshitij15kamble@gmail.com'
-EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_PASSWORD")  # Use App Password if 2FA is enabled
+EMAIL_HOST_PASSWORD = 'hgxh fjlb jqxi zgsu'  # Use App Password if 2FA is enabled
 
 DEFAULT_FROM_EMAIL = 'SecureDocs <kshitij15kamble@gmail.com>'
 SITE_URL = os.environ.get("SITE_URL", "http://127.0.0.1:8000")

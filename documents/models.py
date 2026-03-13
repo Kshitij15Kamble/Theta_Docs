@@ -37,12 +37,16 @@ class CompanyDocument(models.Model):
         ('Article', 'Article'),
     ]
 
-    title = models.CharField(max_length=255)
-    author = models.CharField(max_length=255, blank=True, null=True)
+    title = models.CharField(max_length=50)
+    author = models.CharField(max_length=50, blank=True, null=True)
     publication_year = models.IntegerField(blank=True, null=True)
-    publication_type = models.CharField(max_length=100, blank=True, null=True)
+    publication_type = models.CharField(max_length=20, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     file = models.FileField(upload_to='protected/')
+    cover_image = models.ImageField(
+        upload_to="covers/",
+        blank=True,
+        null=True)
 
     accessible_by = models.ManyToManyField(User, blank=True)
     accessible_groups = models.ManyToManyField(Group, blank=True)

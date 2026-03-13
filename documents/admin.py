@@ -1,21 +1,21 @@
-from urllib import request
-from django.contrib.auth.models import Permission
 from django.contrib import admin
 from django.contrib.admin.models import LogEntry
 from django.contrib.auth.models import User, Group, Permission
 from django.contrib.auth.admin import UserAdmin, GroupAdmin
+from django.utils.html import format_html
+from django.urls import reverse
+from django.http import HttpResponseRedirect
+
 from .models import CompanyDocument
 from .forms import AdminUserCreationForm
 from .utils import generate_secure_password, send_user_credentials_email
-from django.http import HttpResponseRedirect
-from django.utils.html import format_html
-from django.urls import reverse
 
 
 # ===============================
 # Company Document Admin
 # ===============================
 class CompanyDocumentAdmin(admin.ModelAdmin):
+
     list_display = (
         "title",
         "author",
@@ -25,48 +25,44 @@ class CompanyDocumentAdmin(admin.ModelAdmin):
         "view_button",
         "edit_button",
     )
-
     list_display_links = None
-    search_fields = ("title", "author")
-    ordering = ("-created_at",)
-
+    list_filter = ("publication_type",)
+    search_fields = ("title", "author", "publication_year")
     # VIEW BUTTON
     def view_button(self, obj):
-        url = reverse("secure_document_view", args=[obj.id])
+        url = reverse("document_detail", args=[obj.id])
         return format_html(
-            '<a class="button" target="_blank" href="{}">View</a>',
-            url
-        )
+        '<div class="action-buttons"><a class="button view-btn" href="{}">View</a></div>',
+        url
+    )
 
-    view_button.short_description = "View"
-
-    # EDIT BUTTON
     def edit_button(self, obj):
         url = reverse("admin:documents_companydocument_change", args=[obj.id])
         return format_html(
-            '<a class="button" href="{}">Edit</a>',
-            url
-        )
-
-    edit_button.short_description = "Edit"
+            '<div class="action-buttons"><a class="button edit-btn" href="{}">Edit</a></div>',
+        url
+    )
 
 
-
-
-
+# ===============================
+# Redirect Admin Dashboard
+# ===============================
 def custom_admin_index(request):
     return HttpResponseRedirect("/admin/documents/companydocument/")
 
+
 admin.site.index = custom_admin_index
+
+
 # ===============================
 # Custom User Admin
 # ===============================
 class CustomUserAdmin(UserAdmin):
+
     model = User
     add_form = AdminUserCreationForm
-    readonly_fields = ('last_login', 'date_joined')
+    readonly_fields = ("last_login", "date_joined")
 
-    # ✅ NEW: Custom list display
     list_display = (
         "username",
         "email",
@@ -74,9 +70,9 @@ class CustomUserAdmin(UserAdmin):
         "activity_button",
     )
 
-    # ❌ Remove clickable username
     list_display_links = None
     list_filter = ()
+
     add_fieldsets = (
         (None, {
             "classes": ("wide",),
@@ -86,20 +82,20 @@ class CustomUserAdmin(UserAdmin):
 
     # ---------------- EDIT BUTTON ----------------
     def edit_button(self, obj):
-        url = reverse("admin:auth_user_change", args=[obj.id])
-        return format_html(
-            '<a class="button" href="{}">Edit</a>',
-            url
-        )
-    edit_button.short_description = "Edit"
+
+        request = getattr(self, "_request", None)
+
+        if request and request.user.has_perm("auth.change_user"):
+            url = reverse("admin:auth_user_change", args=[obj.id])
+            return format_html('<a class="button" href="{}">Edit</a>', url)
+
+        return "-"
 
     # ---------------- ACTIVITY BUTTON ----------------
     def activity_button(self, obj):
         url = reverse("admin:admin_logentry_changelist") + f"?user__id__exact={obj.id}"
-        return format_html(
-            '<a class="button" href="{}">Activity</a>',
-            url
-        )
+        return format_html('<a class="button" href="{}">Activity</a>', url)
+
     activity_button.short_description = "Activity"
 
     # ---------------- ADD FORM ----------------
@@ -108,13 +104,26 @@ class CustomUserAdmin(UserAdmin):
             kwargs["form"] = self.add_form
         return super().get_form(request, obj, **kwargs)
 
+    def get_queryset(self, request):
+        self._request = request
+        return super().get_queryset(request)
+
+    def has_change_permission(self, request, obj=None):
+        if request.user.has_perm("auth.change_user"):
+            return True
+        return False
+
     # ---------------- SECURITY FIELD CONTROL ----------------
     def get_fieldsets(self, request, obj=None):
+
         fieldsets = super().get_fieldsets(request, obj)
 
         if not request.user.is_superuser:
+
             cleaned = []
+
             for name, options in fieldsets:
+
                 options = options.copy()
                 fields = list(options.get("fields", []))
 
@@ -139,26 +148,34 @@ class CustomUserAdmin(UserAdmin):
 
             obj.set_password(password)
 
-            # make user staff
+            # Make user staff
             obj.is_staff = True
 
         super().save_model(request, obj, form, change)
 
         if is_new_user:
+
             send_user_credentials_email(
                 username=obj.username,
                 password=password,
                 email=obj.email
             )
-        view_permission = Permission.objects.get(codename="view_companydocument")
-        obj.user_permissions.add(view_permission)
+
+            view_permission = Permission.objects.get(
+                codename="view_companydocument"
+            )
+
+            obj.user_permissions.add(view_permission)
 
     # ---------------- RESTRICT PERMISSIONS ----------------
     def formfield_for_manytomany(self, db_field, request, **kwargs):
+
         if db_field.name == "user_permissions" and not request.user.is_superuser:
+
             kwargs["queryset"] = Permission.objects.filter(
                 codename="view_companydocument"
             )
+
         return super().formfield_for_manytomany(db_field, request, **kwargs)
 
 
@@ -167,34 +184,38 @@ class CustomUserAdmin(UserAdmin):
 # ===============================
 class CustomGroupAdmin(GroupAdmin):
 
-    # Remove filters
     list_filter = ()
-
-    # Remove bulk actions
     actions = None
 
-    # Custom columns
     list_display = (
         "name",
         "edit_button",
     )
 
-    # Make name NOT clickable
     list_display_links = None
-    # Edit button
-    def edit_button(self, obj): 
+
+    def edit_button(self, obj):
         url = reverse("admin:auth_group_change", args=[obj.id])
-        return format_html(
-            '<a class="button" href="{}">Edit</a>',
-            url
-        )
+        return format_html('<a class="button" href="{}">Edit</a>', url)
+
+    edit_button.short_description = "Edit"
+
+
 # ===============================
 # Log Entry Admin (User Activity)
 # ===============================
 @admin.register(LogEntry)
 class LogEntryAdmin(admin.ModelAdmin):
-    list_display = ('user', 'content_type', 'object_repr', 'action_flag', 'action_time')
-    list_filter = ('user',)
+
+    list_display = (
+        "user",
+        "content_type",
+        "object_repr",
+        "action_flag",
+        "action_time",
+    )
+
+    list_filter = ("user",)
 
 
 # ===============================
@@ -207,6 +228,10 @@ admin.site.register(User, CustomUserAdmin)
 admin.site.register(Group, CustomGroupAdmin)
 admin.site.register(CompanyDocument, CompanyDocumentAdmin)
 
+
+# ===============================
+# Admin Branding
+# ===============================
 admin.site.site_header = "Theta Docs Admin"
 admin.site.site_title = "Theta Docs Admin"
 admin.site.index_title = "Theta Docs Management"

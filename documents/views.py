@@ -111,3 +111,24 @@ class SecurePasswordResetView(FormView):
     def form_valid(self, form):
         form.save(self.request)
         return super().form_valid(form)
+    
+
+# ================= Document_detail =================
+from django.shortcuts import render, get_object_or_404
+from .models import CompanyDocument
+
+
+def document_detail(request, doc_id):
+
+    document = get_object_or_404(CompanyDocument, id=doc_id)
+
+    return render(
+        request,
+        "documents/document_detail.html",
+        {"document": document}
+    )
+
+
+
+
+

@@ -4,7 +4,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 
 
-def generate_secure_password(length=12):
+def generate_secure_password(length=8):
     chars = string.ascii_letters + string.digits + "!@#$%^&*"
     return ''.join(secrets.choice(chars) for _ in range(length))
 
@@ -17,7 +17,7 @@ Hello {username},
 Your account has been created.
 
 Login URL:
-{settings.SITE_URL}/login/
+{settings.SITE_URL}/
 
 Username: {username}
 Temporary Password: {password}

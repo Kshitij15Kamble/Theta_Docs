@@ -43,5 +43,11 @@ urlpatterns = [
         name="password_change_done",
     ),
 
+    path(
+    "detail/<int:doc_id>/",
+    views.document_detail,
+    name="document_detail"
+),
+
     path('logout/', LogoutView.as_view(), name='logout'),
 ]
