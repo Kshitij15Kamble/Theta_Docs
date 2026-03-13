@@ -5,7 +5,6 @@ from django.contrib.auth.admin import UserAdmin, GroupAdmin
 from django.utils.html import format_html
 from django.urls import reverse
 from django.http import HttpResponseRedirect
-
 from .models import CompanyDocument
 from .forms import AdminUserCreationForm
 from .utils import generate_secure_password, send_user_credentials_email
@@ -16,33 +15,71 @@ from .utils import generate_secure_password, send_user_credentials_email
 # ===============================
 class CompanyDocumentAdmin(admin.ModelAdmin):
 
-    list_display = (
-        "title",
-        "author",
-        "publication_year",
-        "publication_type",
-        "created_at",
-        "view_button",
-        "edit_button",
-    )
     list_display_links = None
     list_filter = ("publication_type",)
     search_fields = ("title", "author", "publication_year")
-    # VIEW BUTTON
+
+    # Dynamically control visible columns
+    def get_list_display(self, request):
+
+        base = [
+            "title",
+            "author",
+            "publication_year",
+            "publication_type",
+            "created_at",
+            "view_button",
+        ]
+
+        # Only show Edit column if user has permission
+        if request.user.has_perm("documents.change_companydocument"):
+            base.append("edit_button")
+
+        return base
+
+
+    # Store request so buttons can check permissions
+    def get_queryset(self, request):
+        self._request = request
+        return super().get_queryset(request)
+
+
+    # ================= VIEW BUTTON =================
     def view_button(self, obj):
         url = reverse("document_detail", args=[obj.id])
         return format_html(
-        '<div class="action-buttons"><a class="button view-btn" href="{}">View</a></div>',
-        url
-    )
+            '<div class="action-buttons">'
+            '<a class="button view-btn" href="{}">View</a>'
+            '</div>',
+            url
+        )
 
+    view_button.short_description = "View"
+
+
+    # ================= EDIT BUTTON =================
     def edit_button(self, obj):
-        url = reverse("admin:documents_companydocument_change", args=[obj.id])
-        return format_html(
-            '<div class="action-buttons"><a class="button edit-btn" href="{}">Edit</a></div>',
-        url
-    )
 
+        request = getattr(self, "_request", None)
+
+        if request and request.user.has_perm("documents.change_companydocument"):
+            url = reverse("admin:documents_companydocument_change", args=[obj.id])
+            return format_html(
+                '<div class="action-buttons">'
+                '<a class="button edit-btn" href="{}">Edit</a>'
+                '</div>',
+                url
+            )
+
+        return "-"
+
+    edit_button.short_description = "Edit"
+
+
+    # ================= EXTRA SECURITY =================
+    def has_change_permission(self, request, obj=None):
+        return request.user.has_perm("documents.change_companydocument")
+    
 
 # ===============================
 # Redirect Admin Dashboard
@@ -61,24 +98,26 @@ class CustomUserAdmin(UserAdmin):
 
     model = User
     add_form = AdminUserCreationForm
+
     readonly_fields = ("last_login", "date_joined")
-
-    list_display = (
-        "username",
-        "email",
-        "edit_button",
-        "activity_button",
-    )
-
     list_display_links = None
     list_filter = ()
 
-    add_fieldsets = (
-        (None, {
-            "classes": ("wide",),
-            "fields": ("username", "first_name", "last_name", "email"),
-        }),
-    )
+    # ---------------- DYNAMIC COLUMN CONTROL ----------------
+    def get_list_display(self, request):
+
+        columns = [
+            "username",
+            "email",
+            "activity_button",
+        ]
+
+        # Show Edit column only if user has permission
+        if request.user.has_perm("auth.change_user"):
+            columns.insert(2, "edit_button")
+
+        return columns
+
 
     # ---------------- EDIT BUTTON ----------------
     def edit_button(self, obj):
@@ -91,6 +130,9 @@ class CustomUserAdmin(UserAdmin):
 
         return "-"
 
+    edit_button.short_description = "Edit"
+
+
     # ---------------- ACTIVITY BUTTON ----------------
     def activity_button(self, obj):
         url = reverse("admin:admin_logentry_changelist") + f"?user__id__exact={obj.id}"
@@ -98,22 +140,38 @@ class CustomUserAdmin(UserAdmin):
 
     activity_button.short_description = "Activity"
 
+
     # ---------------- ADD FORM ----------------
+    add_fieldsets = (
+        (None, {
+            "classes": ("wide",),
+            "fields": ("username", "first_name", "last_name", "email"),
+        }),
+    )
+
+
     def get_form(self, request, obj=None, **kwargs):
+
         if obj is None:
             kwargs["form"] = self.add_form
+
         return super().get_form(request, obj, **kwargs)
 
+
+    # ---------------- STORE REQUEST ----------------
     def get_queryset(self, request):
+
         self._request = request
         return super().get_queryset(request)
 
-    def has_change_permission(self, request, obj=None):
-        if request.user.has_perm("auth.change_user"):
-            return True
-        return False
 
-    # ---------------- SECURITY FIELD CONTROL ----------------
+    # ---------------- PERMISSION CONTROL ----------------
+    def has_change_permission(self, request, obj=None):
+
+        return request.user.has_perm("auth.change_user")
+
+
+    # ---------------- FIELD SECURITY ----------------
     def get_fieldsets(self, request, obj=None):
 
         fieldsets = super().get_fieldsets(request, obj)
@@ -138,17 +196,19 @@ class CustomUserAdmin(UserAdmin):
 
         return fieldsets
 
-    # ---------------- PASSWORD AUTO GENERATE ----------------
+
+    # ---------------- PASSWORD AUTO GENERATION ----------------
     def save_model(self, request, obj, form, change):
 
         is_new_user = obj.pk is None
 
         if is_new_user:
+
             password = generate_secure_password()
 
             obj.set_password(password)
 
-            # Make user staff
+            # Make user staff so they can login to admin
             obj.is_staff = True
 
         super().save_model(request, obj, form, change)
@@ -161,13 +221,15 @@ class CustomUserAdmin(UserAdmin):
                 email=obj.email
             )
 
+            # Give permission to view company documents
             view_permission = Permission.objects.get(
                 codename="view_companydocument"
             )
 
             obj.user_permissions.add(view_permission)
 
-    # ---------------- RESTRICT PERMISSIONS ----------------
+
+    # ---------------- PERMISSION FILTER ----------------
     def formfield_for_manytomany(self, db_field, request, **kwargs):
 
         if db_field.name == "user_permissions" and not request.user.is_superuser:
@@ -204,6 +266,10 @@ class CustomGroupAdmin(GroupAdmin):
 # ===============================
 # Log Entry Admin (User Activity)
 # ===============================
+from django.contrib.admin.models import LogEntry
+from django.contrib import admin
+
+
 @admin.register(LogEntry)
 class LogEntryAdmin(admin.ModelAdmin):
 
@@ -217,7 +283,28 @@ class LogEntryAdmin(admin.ModelAdmin):
 
     list_filter = ("user",)
 
+    # Remove Django default delete action
+    def get_actions(self, request):
+        actions = super().get_actions(request)
 
+        if "delete_selected" in actions:
+            del actions["delete_selected"]
+
+        return actions
+
+    # Custom delete action
+    actions = ["delete_selected_logs"]
+
+    def delete_selected_logs(self, request, queryset):
+        queryset.delete()
+
+    delete_selected_logs.short_description = "Delete selected log entries"
+
+    # Stop logging deletion of logs
+    def log_deletion(self, request, obj, object_repr):
+        pass
+
+    
 # ===============================
 # Register Everything
 # ===============================

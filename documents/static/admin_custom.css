@@ -115,12 +115,14 @@ body,
 .table td a.button {
 
     display: block !important;
-    width: 100% !important;
+
+    width: 180px !important;   /* fixed width */
+
+    margin: 12px auto !important;  /* center horizontally */
 
     text-align: center !important;
 
-    padding: 12px 14px !important;
-    margin-top: 12px !important;
+    padding: 10px 12px !important;
 
     border-radius: 20px !important;
 
@@ -131,14 +133,21 @@ body,
     color: white !important;
 
     text-decoration: none !important;
-
 }
 
 .table tbody td:first-child {
     margin-bottom: 20px;
 }
 }
+@media (max-width:768px){
 
+.table tbody td:last-child{
+    padding-left:0 !important;
+    padding-right:0 !important;
+    text-align:center !important;
+}
+
+}
 
 
 /* ================================= */
