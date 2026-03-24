@@ -163,14 +163,14 @@ JAZZMIN_SETTINGS = {
     },
 
 }
-
+import os
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
-EMAIL_HOST_USER = 'kshitij15kamble@gmail.com'
-EMAIL_HOST_PASSWORD = 'hgxh fjlb jqxi zgsu'  # Use App Password if 2FA is enabled
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD =os.getenv("EMAIL_HOST_PASSWORD") #'hgxh fjlb jqxi zgsu'  # Use App Password if 2FA is enabled
 
 DEFAULT_FROM_EMAIL = 'SecureDocs <kshitij15kamble@gmail.com>'
 SITE_URL = os.environ.get("SITE_URL", "http://127.0.0.1:8000")
