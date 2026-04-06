@@ -11,7 +11,10 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 import os
 from pathlib import Path
+from dotenv import load_dotenv
 
+
+load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -82,11 +85,14 @@ WSGI_APPLICATION = 'core.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'theta_docs_db',
+        'USER': 'postgres',
+        'PASSWORD': 'King2201',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
-
 
 
 # Password validation
@@ -98,6 +104,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 8,
+        }
     },
     {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
@@ -163,7 +172,7 @@ JAZZMIN_SETTINGS = {
     },
 
 }
-import os
+
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
@@ -172,7 +181,7 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD =os.getenv("EMAIL_HOST_PASSWORD") #'hgxh fjlb jqxi zgsu'  # Use App Password if 2FA is enabled
 
-DEFAULT_FROM_EMAIL = 'SecureDocs <kshitij15kamble@gmail.com>'
+DEFAULT_FROM_EMAIL =EMAIL_HOST_USER #'SecureDocs <kshitij15kamble@gmail.com>'
 SITE_URL = os.environ.get("SITE_URL", "http://127.0.0.1:8000")
 
 

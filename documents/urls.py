@@ -2,6 +2,7 @@ from django.urls import path
 from . import views
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.views import LogoutView
+from django.contrib.auth.decorators import login_required
 
 urlpatterns = [
 
@@ -12,7 +13,7 @@ urlpatterns = [
         name="secure_document_view"
     ),
 
-    # Stream PDF (new lightweight endpoint)
+    # Stream PDF
     path(
         "secure-document/<int:doc_id>/file/",
         views.stream_document,
@@ -26,28 +27,33 @@ urlpatterns = [
         name="log_document_close",
     ),
 
-    # Change password
+    # ================= PASSWORD CHANGE (FIXED) =================
     path(
         "change-password/",
-        auth_views.PasswordChangeView.as_view(
-            template_name="documents/change_password.html"
+        login_required(
+            auth_views.PasswordChangeView.as_view(
+                template_name="admin/password_change_form.html"
+            )
         ),
         name="change_password",
     ),
 
     path(
         "change-password-done/",
-        auth_views.PasswordChangeDoneView.as_view(
-            template_name="documents/change_password_done.html"
+        login_required(
+            auth_views.PasswordChangeDoneView.as_view(
+                template_name="admin/password_change_done.html"
+            )
         ),
         name="password_change_done",
     ),
 
+    # ================= DOCUMENT DETAIL =================
     path(
-    "detail/<int:doc_id>/",
-    views.document_detail,
-    name="document_detail"
-),
+        "detail/<int:doc_id>/",
+        views.document_detail,
+        name="document_detail"
+    ),
 
     path('logout/', LogoutView.as_view(), name='logout'),
 ]

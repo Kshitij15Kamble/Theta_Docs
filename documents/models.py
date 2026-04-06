@@ -5,16 +5,14 @@ import re
 # Words that must always stay uppercase
 UPPER_WORDS = {"AI", "ML", "API", "PDF", "IoT", "NLP"}
 
+
 def smart_format_text(text):
     if not text:
         return text
 
     text = text.strip()
-
-    # Convert to title case
     text = text.title()
 
-    # Fix specific uppercase words
     for word in UPPER_WORDS:
         text = re.sub(rf"\b{word.title()}\b", word, text)
 
@@ -27,7 +25,6 @@ def format_author_name(name):
 
     name = name.strip()
     return " ".join(part.capitalize() for part in name.split())
-
 
 
 class CompanyDocument(models.Model):
@@ -46,7 +43,8 @@ class CompanyDocument(models.Model):
     cover_image = models.ImageField(
         upload_to="covers/",
         blank=True,
-        null=True)
+        null=True
+    )
 
     accessible_by = models.ManyToManyField(User, blank=True)
     accessible_groups = models.ManyToManyField(Group, blank=True)
@@ -58,20 +56,37 @@ class CompanyDocument(models.Model):
 
     def __str__(self):
         return self.title
+
+    # ================= SAVE (UPDATED) =================
     def save(self, *args, **kwargs):
 
-    # Format all manually entered text fields
-        if hasattr(self, "title"):
+        # 🔥 DELETE OLD FILE IF REPLACED
+        try:
+            old = CompanyDocument.objects.get(pk=self.pk)
+            if old.file and old.file != self.file:
+                old.file.delete(save=False)
+        except CompanyDocument.DoesNotExist:
+            pass
+
+        # Format fields
+        if self.title:
             self.title = smart_format_text(self.title)
 
-        if hasattr(self, "author"):
+        if self.author:
             self.author = format_author_name(self.author)
 
-        if hasattr(self, "publication_type"):
+        if self.publication_type:
             self.publication_type = smart_format_text(self.publication_type)
 
-        if hasattr(self, "publication_year"):
-            if self.publication_year:
-                self.publication_year = str(self.publication_year).strip()
+        # ❌ removed string conversion of publication_year (keep as int)
 
         super().save(*args, **kwargs)
+
+    # ================= DELETE (NEW) =================
+    def delete(self, *args, **kwargs):
+
+        # 🔥 DELETE FILE FROM STORAGE
+        if self.file:
+            self.file.delete(save=False)
+
+        super().delete(*args, **kwargs)

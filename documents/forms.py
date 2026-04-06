@@ -47,6 +47,12 @@ If you did not request this, ignore this email.
 
 
 class AdminUserCreationForm(forms.ModelForm):
+
+    username = forms.CharField(
+        max_length=150,
+        help_text=""  # 🔥 removes default text
+    )
+
     class Meta:
         model = User
         fields = ("username", "first_name", "last_name", "email")
