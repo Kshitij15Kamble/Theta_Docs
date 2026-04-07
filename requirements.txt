@@ -11,5 +11,5 @@ sqlparse==0.5.5
 tzdata==2025.3
 whitenoise==6.11.0
 python-dotenv==1.0.0
-
+dj-database-url==2.1.0
 
