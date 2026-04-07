@@ -5,6 +5,7 @@ from django.contrib.auth.admin import UserAdmin, GroupAdmin
 from django.utils.html import format_html
 from django.urls import reverse
 from django.http import HttpResponseRedirect
+
 from .models import CompanyDocument
 from .forms import AdminUserCreationForm
 from .utils import generate_secure_password, send_user_credentials_email
@@ -41,9 +42,7 @@ class CompanyDocumentAdmin(admin.ModelAdmin):
     def view_button(self, obj):
         url = reverse("document_detail", args=[obj.id])
         return format_html(
-            '<div class="action-buttons">'
-            '<a class="button view-btn" href="{}">View</a>'
-            '</div>',
+            '<a class="button view-btn" href="{}">View</a>',
             url
         )
     view_button.short_description = "View"
@@ -54,9 +53,7 @@ class CompanyDocumentAdmin(admin.ModelAdmin):
         if request and request.user.has_perm("documents.change_companydocument"):
             url = reverse("admin:documents_companydocument_change", args=[obj.id])
             return format_html(
-                '<div class="action-buttons">'
-                '<a class="button edit-btn" href="{}">Edit</a>'
-                '</div>',
+                '<a class="button edit-btn" href="{}">Edit</a>',
                 url
             )
         return "-"
@@ -65,22 +62,18 @@ class CompanyDocumentAdmin(admin.ModelAdmin):
     def has_change_permission(self, request, obj=None):
         return request.user.has_perm("documents.change_companydocument")
 
-    # ===============================
-    # 🔥 FILE DELETE FIX (ADD THIS)
-    # ===============================
-
-    # Bulk delete
+    # 🔥 Delete file from storage also
     def delete_queryset(self, request, queryset):
         for obj in queryset:
             if obj.file:
                 obj.file.delete(save=False)
         queryset.delete()
 
-    # Single delete
     def delete_model(self, request, obj):
         if obj.file:
             obj.file.delete(save=False)
         super().delete_model(request, obj)
+
 
 # ===============================
 # Redirect Admin Dashboard
@@ -99,12 +92,10 @@ class CustomUserAdmin(UserAdmin):
     model = User
     add_form = AdminUserCreationForm
 
-    # ✅ removed password_display
     readonly_fields = ("last_login", "date_joined")
     list_display_links = None
     list_filter = ()
 
-    # ---------------- DYNAMIC COLUMN CONTROL ----------------
     def get_list_display(self, request):
         columns = [
             "username",
@@ -117,7 +108,6 @@ class CustomUserAdmin(UserAdmin):
 
         return columns
 
-    # ---------------- EDIT BUTTON ----------------
     def edit_button(self, obj):
         request = getattr(self, "_request", None)
 
@@ -128,13 +118,11 @@ class CustomUserAdmin(UserAdmin):
         return "-"
     edit_button.short_description = "Edit"
 
-    # ---------------- ACTIVITY BUTTON ----------------
     def activity_button(self, obj):
         url = reverse("admin:admin_logentry_changelist") + f"?user__id__exact={obj.id}"
         return format_html('<a class="button" href="{}">Activity</a>', url)
     activity_button.short_description = "Activity"
 
-    # ---------------- ADD FORM ----------------
     add_fieldsets = (
         (None, {
             "classes": ("wide",),
@@ -148,7 +136,6 @@ class CustomUserAdmin(UserAdmin):
 
         form = super().get_form(request, obj, **kwargs)
 
-        # 🔥 REMOVE USERNAME HELP TEXT
         if 'username' in form.base_fields:
             form.base_fields['username'].help_text = ""
 
@@ -158,29 +145,21 @@ class CustomUserAdmin(UserAdmin):
         self._request = request
         return super().get_queryset(request)
 
-    # ---------------- PERMISSION CONTROL ----------------
     def has_change_permission(self, request, obj=None):
         return request.user.has_perm("auth.change_user")
 
-    # ================= FIELD SECURITY =================
     def get_fieldsets(self, request, obj=None):
-
         fieldsets = super().get_fieldsets(request, obj)
 
-        # 🔥 If NO permission → REMOVE password completely
         if not request.user.has_perm("auth.change_user"):
-
             cleaned = []
 
             for name, options in fieldsets:
-
                 options = options.copy()
                 fields = list(options.get("fields", []))
 
-                # ❌ REMOVE password field
                 fields = [f for f in fields if f != "password"]
 
-                # ❌ REMOVE sensitive fields
                 fields = [
                     f for f in fields
                     if f not in ("is_staff", "is_superuser", "user_permissions")
@@ -193,9 +172,7 @@ class CustomUserAdmin(UserAdmin):
 
         return fieldsets
 
-    # ---------------- PASSWORD AUTO GENERATION ----------------
     def save_model(self, request, obj, form, change):
-
         is_new_user = obj.pk is None
 
         if is_new_user:
@@ -215,18 +192,16 @@ class CustomUserAdmin(UserAdmin):
             view_permission = Permission.objects.get(
                 codename="view_companydocument"
             )
-
             obj.user_permissions.add(view_permission)
 
-    # ---------------- PERMISSION FILTER ----------------
     def formfield_for_manytomany(self, db_field, request, **kwargs):
-
         if db_field.name == "user_permissions" and not request.user.is_superuser:
             kwargs["queryset"] = Permission.objects.filter(
                 codename="view_companydocument"
             )
 
         return super().formfield_for_manytomany(db_field, request, **kwargs)
+
 
 # ===============================
 # Custom Group Admin
@@ -236,11 +211,7 @@ class CustomGroupAdmin(GroupAdmin):
     list_filter = ()
     actions = None
 
-    list_display = (
-        "name",
-        "edit_button",
-    )
-
+    list_display = ("name", "edit_button")
     list_display_links = None
 
     def edit_button(self, obj):
@@ -250,7 +221,7 @@ class CustomGroupAdmin(GroupAdmin):
 
 
 # ===============================
-# Log Entry Admin
+# 🔐 SECURE Log Entry Admin
 # ===============================
 @admin.register(LogEntry)
 class LogEntryAdmin(admin.ModelAdmin):
@@ -265,21 +236,24 @@ class LogEntryAdmin(admin.ModelAdmin):
 
     list_filter = ("user",)
 
+    # ❌ Remove bulk delete
     def get_actions(self, request):
         actions = super().get_actions(request)
         if "delete_selected" in actions:
             del actions["delete_selected"]
         return actions
 
-    actions = ["delete_selected_logs"]
+    # 🔐 Disable delete completely
+    def has_delete_permission(self, request, obj=None):
+        return False
 
-    def delete_selected_logs(self, request, queryset):
-        queryset.delete()
+    # 🔐 Disable edit
+    def has_change_permission(self, request, obj=None):
+        return False
 
-    delete_selected_logs.short_description = "Delete selected log entries"
-
-    def log_deletion(self, request, obj, object_repr):
-        pass
+    # 🔐 Disable add
+    def has_add_permission(self, request):
+        return False
 
 
 # ===============================
@@ -294,7 +268,7 @@ admin.site.register(CompanyDocument, CompanyDocumentAdmin)
 
 
 # ===============================
-# Admin Branding
+# Branding
 # ===============================
 admin.site.site_header = "Theta Docs Admin"
 admin.site.site_title = "Theta Docs Admin"
