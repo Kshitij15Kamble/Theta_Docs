@@ -85,7 +85,7 @@ DATABASES = {
     )
 }
 
-# 🔐 Enable SSL only for production (Render)
+# Enable SSL only for production (Render)
 if "localhost" not in DATABASE_URL:
     DATABASES['default']['OPTIONS'] = {
         'sslmode': 'require',
@@ -169,6 +169,7 @@ JAZZMIN_SETTINGS = {
         "auth.Group": "fas fa-users",
         "documents.CompanyDocument": "fas fa-file-pdf",
     },
+    "footer": "Theta Docs © 2026 | Secure Document System",
 }
 
 # ===============================

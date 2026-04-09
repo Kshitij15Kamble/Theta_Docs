@@ -18,7 +18,7 @@ class UsernameEmailPasswordResetForm(forms.Form):
         try:
             user = User.objects.get(username=username, email=email)
         except User.DoesNotExist:
-            # 🔒 Security: do nothing (no leak)
+            # Security: do nothing (no leak)
             return
 
         token = PasswordResetTokenGenerator().make_token(user)

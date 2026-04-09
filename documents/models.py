@@ -32,6 +32,9 @@ class CompanyDocument(models.Model):
         ('Magazine', 'Magazine'),
         ('Book', 'Book'),
         ('Article', 'Article'),
+        ('Report', 'Report'),
+        ('Research Paper', 'Research Paper'),
+        ('Other', 'Other'),
     ]
 
     title = models.CharField(max_length=50)
@@ -60,7 +63,6 @@ class CompanyDocument(models.Model):
     # ================= SAVE (UPDATED) =================
     def save(self, *args, **kwargs):
 
-        # 🔥 DELETE OLD FILE IF REPLACED
         try:
             old = CompanyDocument.objects.get(pk=self.pk)
             if old.file and old.file != self.file:
@@ -78,15 +80,13 @@ class CompanyDocument(models.Model):
         if self.publication_type:
             self.publication_type = smart_format_text(self.publication_type)
 
-        # ❌ removed string conversion of publication_year (keep as int)
-
         super().save(*args, **kwargs)
 
     # ================= DELETE (NEW) =================
     def delete(self, *args, **kwargs):
-
-        # 🔥 DELETE FILE FROM STORAGE
         if self.file:
             self.file.delete(save=False)
 
         super().delete(*args, **kwargs)
+
+    

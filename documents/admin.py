@@ -41,10 +41,7 @@ class CompanyDocumentAdmin(admin.ModelAdmin):
 
     def view_button(self, obj):
         url = reverse("document_detail", args=[obj.id])
-        return format_html(
-            '<a class="button view-btn" href="{}">View</a>',
-            url
-        )
+        return format_html('<a class="button view-btn" href="{}">View</a>', url)
     view_button.short_description = "View"
 
     def edit_button(self, obj):
@@ -52,10 +49,7 @@ class CompanyDocumentAdmin(admin.ModelAdmin):
 
         if request and request.user.has_perm("documents.change_companydocument"):
             url = reverse("admin:documents_companydocument_change", args=[obj.id])
-            return format_html(
-                '<a class="button edit-btn" href="{}">Edit</a>',
-                url
-            )
+            return format_html('<a class="button edit-btn" href="{}">Edit</a>', url)
         return "-"
     edit_button.short_description = "Edit"
 
@@ -221,7 +215,7 @@ class CustomGroupAdmin(GroupAdmin):
 
 
 # ===============================
-# 🔐 SECURE Log Entry Admin
+# 🔐 FINAL Log Entry Admin (FIXED)
 # ===============================
 @admin.register(LogEntry)
 class LogEntryAdmin(admin.ModelAdmin):
@@ -235,23 +229,26 @@ class LogEntryAdmin(admin.ModelAdmin):
     )
 
     list_filter = ("user",)
-
-    # ❌ Remove bulk delete
+    sortable_by = ()
+    # ✅ Control bulk delete visibility
     def get_actions(self, request):
         actions = super().get_actions(request)
-        if "delete_selected" in actions:
-            del actions["delete_selected"]
+
+        if not request.user.has_perm("admin.delete_logentry"):
+            if "delete_selected" in actions:
+                del actions["delete_selected"]
+
         return actions
 
-    # 🔐 Disable delete completely
+    # ✅ Permission-based delete
     def has_delete_permission(self, request, obj=None):
-        return False
+        return request.user.has_perm("admin.delete_logentry")
 
-    # 🔐 Disable edit
+    # ✅ View permission
     def has_change_permission(self, request, obj=None):
-        return False
+        return request.user.has_perm("admin.view_logentry")
 
-    # 🔐 Disable add
+    # ❌ No manual add
     def has_add_permission(self, request):
         return False
 
